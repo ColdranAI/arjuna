@@ -1,0 +1,30 @@
+{
+	"name": "collector",
+	"version": "0.0.1",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "bun --watch src/index.ts",
+		"build": "bun build src/index.ts --outdir dist --target bun",
+		"start": "bun dist/index.js",
+		"check-types": "tsc --noEmit",
+		"lint": "eslint ."
+	},
+	  "dependencies": {
+    "@arjuna/db": "workspace:*",
+    "@arjuna/geo": "workspace:*",
+    "elysia": "^1.0.0",
+    "@elysiajs/cors": "^1.0.0",
+    "ua-parser-js": "^1.0.0",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.0"
+  },
+	"devDependencies": {
+		"@types/bcryptjs": "^2.4.6",
+		"@types/jsonwebtoken": "^9.0.0",
+		"@types/ua-parser-js": "^0.7.39",
+		"bun-types": "latest",
+		"typescript": "^5.0.0",
+		"eslint": "^9.31.0"
+	}
+}

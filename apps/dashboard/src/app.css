@@ -1,0 +1,55 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 255 255 255;
+    --foreground: 10 10 10;
+    --muted: 245 245 245;
+    --muted-foreground: 115 115 115;
+    --border: 229 229 229;
+    --card: 255 255 255;
+    --card-foreground: 10 10 10;
+  }
+
+  body {
+    @apply bg-white text-gray-900 font-light;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply px-4 py-2 rounded font-medium transition-all duration-200 focus:outline-none focus:ring-1 focus:ring-gray-400;
+  }
+  
+  .btn-primary {
+    @apply btn bg-gray-900 text-white hover:bg-gray-800;
+  }
+  
+  .btn-secondary {
+    @apply btn bg-gray-100 text-gray-900 hover:bg-gray-200 border border-gray-200;
+  }
+  
+  .card {
+    @apply bg-white border border-gray-200 shadow-sm;
+  }
+  
+  .input {
+    @apply w-full px-3 py-2 border border-gray-200 rounded bg-white text-gray-900 focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-colors;
+  }
+
+  .stat-card {
+    @apply bg-white border border-gray-200 p-6 rounded-lg hover:shadow-md transition-shadow duration-200;
+  }
+
+  .progress-bar {
+    @apply w-full bg-gray-100 rounded-full h-1.5;
+  }
+
+  .progress-fill {
+    @apply bg-gray-900 h-1.5 rounded-full transition-all duration-500 ease-out;
+  }
+} 

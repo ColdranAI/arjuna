@@ -1,0 +1,24 @@
+{
+  "name": "arjuna",
+  "private": true,
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "format": "prettier --write .",
+    "check-types": "turbo run check-types",
+    "db:up": "docker-compose up -d postgres redis",
+    "db:down": "docker-compose down",
+    "db:migrate": "cd packages/db && pnpm drizzle-kit generate:pg && pnpm drizzle-kit migrate",
+    "db:studio": "cd packages/db && pnpm drizzle-kit studio"
+  },
+  "devDependencies": {
+    "prettier": "^3.6.0",
+    "prettier-plugin-svelte": "^3.4.0",
+    "turbo": "^2.5.5"
+  },
+  "packageManager": "pnpm@10.0.0",
+  "engines": {
+    "node": ">=18"
+  }
+}

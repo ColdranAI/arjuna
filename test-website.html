@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Website - Arjuna Analytics Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .header {
+            background: #f4f4f4;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+        .nav {
+            display: flex;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        .nav a {
+            padding: 0.5rem 1rem;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+        .nav a:hover {
+            background: #0056b3;
+        }
+        .section {
+            margin: 2rem 0;
+            padding: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .button {
+            background: #28a745;
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .button:hover {
+            background: #1e7e34;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🚀 Arjuna Analytics Test Website</h1>
+        <p>This is a demo website to test the analytics tracking system.</p>
+    </div>
+
+    <nav class="nav">
+        <a href="#home" onclick="navigate('/')">Home</a>
+        <a href="#about" onclick="navigate('/about')">About</a>
+        <a href="#pricing" onclick="navigate('/pricing')">Pricing</a>
+        <a href="#contact" onclick="navigate('/contact')">Contact</a>
+    </nav>
+
+    <div class="section">
+        <h2>Analytics Features Being Tracked</h2>
+        <ul>
+            <li>✅ Pageviews - Each page navigation</li>
+            <li>✅ Unique Visitors - Based on IP + User Agent</li>
+            <li>✅ Session Tracking - Visit duration and bounce rate</li>
+            <li>✅ Geographic Location - Country/region from IP</li>
+            <li>✅ Referrer Information - Where visitors come from</li>
+            <li>✅ Device/Browser Detection - OS, browser, device type</li>
+            <li>✅ Live Visitor Count - Real-time active users</li>
+            <li>✅ Bot Filtering - Excludes crawlers and bots</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>Test Interactions</h2>
+        <p>Click the buttons below to generate analytics events:</p>
+        
+        <button class="button" onclick="navigate('/button-click')">
+            Generate Button Click Event
+        </button>
+        
+        <button class="button" onclick="simulateReferrer()">
+            Simulate External Referrer
+        </button>
+        
+        <button class="button" onclick="addUTMParams()">
+            Test UTM Campaign Tracking
+        </button>
+    </div>
+
+    <div class="section">
+        <h2>Current Session Info</h2>
+        <p><strong>Session ID:</strong> <span id="sessionId">Loading...</span></p>
+        <p><strong>Current URL:</strong> <span id="currentUrl">Loading...</span></p>
+        <p><strong>Referrer:</strong> <span id="referrer">Loading...</span></p>
+        <p><strong>User Agent:</strong> <span id="userAgent">Loading...</span></p>
+    </div>
+
+    <div class="section">
+        <h2>Dashboard Access</h2>
+        <p>View your analytics at: <a href="http://localhost:5173" target="_blank">http://localhost:5173</a></p>
+        <p>Use the admin credentials from your <code>.env</code> file to login.</p>
+    </div>
+
+    <!-- Arjuna Analytics Tracking Script -->
+    <script src="http://localhost:3001/tracker.js" defer></script>
+
+    <script>
+        // Display session information
+        function updateSessionInfo() {
+            document.getElementById('sessionId').textContent = 
+                sessionStorage.getItem('arjuna_session') || 'Not set';
+            document.getElementById('currentUrl').textContent = window.location.href;
+            document.getElementById('referrer').textContent = document.referrer || 'Direct';
+            document.getElementById('userAgent').textContent = navigator.userAgent;
+        }
+
+        // Simulate navigation (SPA-style)
+        function navigate(path) {
+            // Update URL without page reload
+            history.pushState({}, '', path);
+            
+            // Trigger manual tracking if needed
+            if (window.arjuna) {
+                window.arjuna.track();
+            }
+            
+            updateSessionInfo();
+        }
+
+        // Simulate external referrer
+        function simulateReferrer() {
+            // This would normally happen when coming from another site
+            alert('In a real scenario, this would track referrer from google.com, twitter.com, etc.');
+        }
+
+        // Add UTM parameters to URL
+        function addUTMParams() {
+            const utmUrl = window.location.pathname + 
+                '?utm_source=newsletter&utm_medium=email&utm_campaign=launch';
+            history.pushState({}, '', utmUrl);
+            
+            // Trigger tracking with UTM params
+            if (window.arjuna) {
+                window.arjuna.track();
+            }
+            
+            updateSessionInfo();
+        }
+
+        // Update session info on load
+        document.addEventListener('DOMContentLoaded', updateSessionInfo);
+
+        // Listen for Arjuna analytics to load
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                if (window.arjuna) {
+                    console.log('✅ Arjuna Analytics loaded successfully!');
+                    console.log('Available methods:', Object.keys(window.arjuna));
+                } else {
+                    console.warn('❌ Arjuna Analytics not loaded. Make sure the collector is running on port 3001.');
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html> 
