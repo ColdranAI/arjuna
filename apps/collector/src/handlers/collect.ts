@@ -43,10 +43,10 @@ export async function collectEvent({
     }
 
     // Get client IP (considering proxies)
-    const clientIP = headers['x-forwarded-for']?.split(',')[0] || 
-                    headers['x-real-ip'] || 
-                    headers['cf-connecting-ip'] || 
-                    '127.0.0.1';
+    const clientIP = headers['x-forwarded-for']?.split(',')[0] || // Standard proxy
+                    headers['x-real-ip'] ||                      // Nginx proxy
+                    headers['true-client-ip'] ||                 // Akamai/other CDNs
+                    '127.0.0.1';                                // Fallback
 
     const userAgent = headers['user-agent'] || '';
     
@@ -62,7 +62,7 @@ export async function collectEvent({
       .digest('hex')
       .substring(0, 32);
 
-    // Check if this is a bot
+    // Bot detection using user-agent
     if (isBot(userAgent)) {
       return new Response('Bot detected', { status: 200 });
     }
@@ -167,7 +167,7 @@ async function getCachedGeoLocation(ip: string, geoResolver: any, redis: any) {
   
   // Try cache first
   const cached = await redis.get(cacheKey);
-  if (cached) {
+  if (cached && cached !== 'null') {
     return JSON.parse(cached);
   }
 
@@ -274,11 +274,13 @@ async function updateDailyStatsCache(websiteId: string, date: string, redis: any
 }
 
 function isBot(userAgent: string): boolean {
+  // User-agent pattern matching for bot detection
   const botPatterns = [
     'bot', 'crawler', 'spider', 'scraper', 'parser',
     'googlebot', 'bingbot', 'slurp', 'duckduckbot',
     'facebookexternalhit', 'twitterbot', 'whatsapp',
-    'lighthouse', 'pingdom', 'uptimerobot'
+    'lighthouse', 'pingdom', 'uptimerobot', 'headless',
+    'phantom', 'selenium', 'webdriver', 'curl', 'wget'
   ];
   
   const ua = userAgent.toLowerCase();

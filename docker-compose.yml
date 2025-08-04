@@ -31,6 +31,72 @@ services:
       timeout: 10s
       retries: 5
 
+  # Analytics Collector API
+  collector:
+    build:
+      context: .
+      target: collector
+    container_name: arjuna-collector
+    ports:
+      - "3001:3001"
+    environment:
+      - DATABASE_URL=postgresql://arjuna:arjuna_dev_password@postgres:5432/arjuna
+      - REDIS_URL=redis://redis:6379
+      - PORT=3001
+      - ADMIN_EMAIL=${ADMIN_EMAIL:-admin@example.com}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-your_secure_password_here}
+      - JWT_SECRET=${JWT_SECRET:-your_jwt_secret_key_here_change_in_production}
+      - IPINFO_TOKEN=${IPINFO_TOKEN:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Analytics Dashboard
+  dashboard:
+    build:
+      context: .
+      target: dashboard
+    container_name: arjuna-dashboard
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_API_URL=http://localhost:3001
+    depends_on:
+      - collector
+    restart: unless-stopped
+
+  # Development mode (alternative to production services)
+  dev:
+    build:
+      context: .
+      target: development
+    container_name: arjuna-dev
+    ports:
+      - "3000:3000"
+      - "3001:3001"
+    environment:
+      - DATABASE_URL=postgresql://arjuna:arjuna_dev_password@postgres:5432/arjuna
+      - REDIS_URL=redis://redis:6379
+      - PORT=3001
+      - ADMIN_EMAIL=${ADMIN_EMAIL:-admin@example.com}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-your_secure_password_here}
+      - JWT_SECRET=${JWT_SECRET:-your_jwt_secret_key_here_change_in_production}
+      - VITE_API_URL=http://localhost:3001
+      - IPINFO_TOKEN=${IPINFO_TOKEN:-}
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    profiles:
+      - dev
+
 volumes:
   postgres_data:
-  redis_data: 
+  redis_data:
