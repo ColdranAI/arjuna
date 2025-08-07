@@ -4,4 +4,5 @@ export type ChartConfig = Record<string, {
 }>;
 
 export { default as ChartContainer } from "./chart-container.svelte";
-export { default as Tooltip } from "./chart-tooltip.svelte"; 
+export { default as Tooltip } from "./chart-tooltip.svelte";
+export { default as SimpleLineChart } from "./simple-line-chart.svelte";

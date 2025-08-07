@@ -1,5 +1,5 @@
 import { drizzle } from 'drizzle-orm/postgres-js';
-import { createClient } from 'redis';
+import { createClient, RedisClientType } from 'redis';
 import postgres from 'postgres';
 import * as schema from './schema.js';
 
@@ -22,16 +22,16 @@ export function getDatabase() {
 }
 
 // Redis connection
-let redis: ReturnType<typeof createClient> | null = null;
+let redis: RedisClientType | null = null;
 
-export function createRedis(url: string) {
+export function createRedis(url: string): RedisClientType {
   if (!redis) {
     redis = createClient({ url });
   }
   return redis;
 }
 
-export function getRedis() {
+export function getRedis(): RedisClientType {
   if (!redis) {
     throw new Error('Redis not initialized. Call createRedis first.');
   }
@@ -46,11 +46,10 @@ export function generateSessionId(): string {
   return crypto.randomUUID();
 }
 
-export function hashIP(ip: string, userAgent: string): string {
+export async function hashIP(ip: string, userAgent: string): Promise<string> {
   const data = new TextEncoder().encode(ip + userAgent);
-  return crypto.subtle.digest('SHA-256', data).then(hash => {
-    return Array.from(new Uint8Array(hash))
-      .map(b => b.toString(16).padStart(2, '0'))
-      .join('');
-  });
-} 
+  const hash = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(hash))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
+}

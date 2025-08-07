@@ -75,9 +75,8 @@ The system now automatically uses IPinfo.io in the geolocation fallback chain:
 
 ```javascript
 // Geolocation Priority (Smart Fallback):
-1. 🔥 CloudFlare Headers    (0ms - instant)
-2. 🎯 IPinfo.io API        (50-100ms - high accuracy) 
-3. 💾 Local Database       (<1ms - always available)
+1. 🎯 IPinfo.io API        (50-100ms - high accuracy)
+2. 💾 Local Database       (<1ms - always available)
 ```
 
 ## 📊 Rate Limits & Pricing
@@ -115,7 +114,6 @@ try {
 | Provider | Accuracy | Speed | Features | Cost |
 |----------|----------|-------|----------|------|
 | **IPinfo.io** | ⭐⭐⭐⭐⭐ | 🚀 Fast | 🔥 Rich data | 💰 Paid |
-| **CloudFlare** | ⭐⭐⭐⭐ | ⚡ Instant | 🎯 Basic geo | ✅ Free |
 | **Local DB** | ⭐⭐⭐ | ⚡ Instant | 🎯 Basic geo | ✅ Free |
 
 ## 🔧 Advanced Features
@@ -244,19 +242,15 @@ import { IPinfoResolver } from '@arjuna/geo';
 const geoResolver = new IPinfoResolver(process.env.IPINFO_TOKEN);
 ```
 
-### **CloudFlare + IPinfo Only**
+### **IPinfo Only**
 
 Skip local database entirely:
 
 ```javascript
-// Custom hybrid without local database
-class CloudFlareIPinfoResolver implements GeoResolver {
-  async resolveIP(ip: string, headers?: Record<string, string>) {
-    // Try CloudFlare first
-    const cfResult = await cloudflareResolver.resolveIP(ip, headers);
-    if (cfResult) return cfResult;
-    
-    // Fallback to IPinfo.io only
+// Custom resolver without local database
+class IPinfoOnlyResolver implements GeoResolver {
+  async resolveIP(ip: string) {
+    // Use IPinfo.io only
     return await ipinfoResolver.resolveIP(ip);
   }
 }

@@ -1,6 +1,6 @@
 import { Context } from 'elysia';
 import { eq, and, sql } from 'drizzle-orm';
-import { pageviews, sessions, websites, generateSessionId } from '@arjuna/db';
+import { pageviews, sessions, websites, generateSessionId, hashIP } from '@arjuna/db';
 import UAParser from 'ua-parser-js';
 import crypto from 'crypto';
 
@@ -72,10 +72,7 @@ export async function collectEvent({
     const websiteId = website.id;
 
     // Hash IP for privacy
-    const ipHash = crypto
-      .createHash('sha256')
-      .update(clientIP + userAgent)
-      .digest('hex');
+    const ipHash = await hashIP(clientIP, userAgent);
 
     // Resolve geolocation with caching
     const geoLocation = await getCachedGeoLocation(clientIP, geoResolver, redis);

@@ -3,6 +3,7 @@
   import { goto } from '$app/navigation';
   import { browser } from '$app/environment';
   import * as Card from "$lib/components/ui/card/index.js";
+  import { SimpleLineChart } from "$lib/components/ui/chart/index.js";
   
   let loading = true;
   let user = null;
@@ -25,6 +26,7 @@
   let topCountries = [];
   let topReferrers = [];
   let goals = [];
+  let chartData = [];
 
   const API_BASE = 'http://localhost:3001';
 
@@ -106,8 +108,9 @@
       if (countriesResponse.ok) topCountries = await countriesResponse.json();
       if (referrersResponse.ok) topReferrers = await referrersResponse.json();
 
-      // Generate mock goals for now
+      // Generate mock goals and chart data for now
       generateMockGoals();
+      generateMockChartData();
 
     } catch (error) {
       console.error('Failed to load dashboard data:', error);
@@ -121,6 +124,18 @@
       total: page.views,
       conversionRate: ((Math.floor(page.views * 0.6) / stats.uniqueVisitors) * 100).toFixed(2)
     }));
+  }
+
+  function generateMockChartData() {
+    const days = timeRange === '24h' ? 24 : timeRange === '7d' ? 7 : timeRange === '30d' ? 30 : 90;
+    chartData = Array.from({ length: days }, (_, i) => {
+      const date = new Date();
+      date.setDate(date.getDate() - (days - 1 - i));
+      return {
+        date: date.toISOString().split('T')[0],
+        value: Math.floor(Math.random() * 1000) + 100
+      };
+    });
   }
 
   async function handleTimeRangeChange(newRange: string) {
@@ -355,6 +370,19 @@
             </div>
             <div class="text-xs text-gray-500 uppercase tracking-wide">Live</div>
           </div>
+        </div>
+
+        <!-- Chart Section -->
+        <div class="mb-12">
+          <Card.Root class="border border-gray-200">
+            <Card.Header class="border-b border-gray-100 pb-4">
+              <Card.Title class="text-lg font-medium text-gray-900">Page Views Over Time</Card.Title>
+              <Card.Description class="text-sm text-gray-500">{getPeriodLabel(timeRange)}</Card.Description>
+            </Card.Header>
+            <Card.Content class="pt-6">
+              <SimpleLineChart data={chartData} class="h-64" />
+            </Card.Content>
+          </Card.Root>
         </div>
 
         <!-- Goals Section -->
