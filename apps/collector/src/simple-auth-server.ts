@@ -3,6 +3,10 @@ import { cors } from '@elysiajs/cors';
 import bcrypt from 'bcryptjs';
 import { JWTService, requireAuth } from './utils/jwt.js';
 
+// Mock data for websites since we don't have database setup
+let mockWebsites: any[] = [];
+let nextWebsiteId = 1;
+
 interface LoginData {
   email: string;
   password: string;
@@ -150,12 +154,162 @@ const app = new Elysia()
     };
   })
   
+  // Analytics endpoints (clean implementation - no mock data)
+  .get('/analytics/websites', async ({ headers, set }) => {
+    try {
+      const authResult = requireAuth(headers.authorization);
+      
+      if (!authResult.success) {
+        set.status = 401;
+        return { error: authResult.error };
+      }
+
+      // Return empty array - no websites until user adds them
+      return [];
+    } catch (error) {
+      console.error('Error in /analytics/websites:', error);
+      set.status = 500;
+      return { error: 'Internal server error' };
+    }
+  })
+  
+  .post('/analytics/websites', async ({ body, headers, set }) => {
+    try {
+      const authResult = requireAuth(headers.authorization);
+      
+      if (!authResult.success) {
+        set.status = 401;
+        return { error: authResult.error };
+      }
+
+      const { domain, name } = body as { domain: string; name: string };
+
+      if (!domain || !domain.trim()) {
+        set.status = 400;
+        return { error: 'Domain is required' };
+      }
+
+      // For now, return a placeholder response
+      // In production, this would save to database
+      set.status = 501;
+      return {
+        error: 'Website creation not implemented yet',
+        message: 'This feature requires database setup. Please use the full collector API with database.'
+      };
+    } catch (error) {
+      console.error('Error in POST /analytics/websites:', error);
+      set.status = 500;
+      return { error: 'Internal server error' };
+    }
+  })
+  
+  .get('/analytics/stats/:websiteId', async ({ params, query, headers, set }) => {
+    try {
+      const authResult = requireAuth(headers.authorization);
+      
+      if (!authResult.success) {
+        set.status = 401;
+        return { error: authResult.error };
+      }
+
+      // Return empty stats - no data until tracking is set up
+      return {
+        pageviews: 0,
+        uniqueVisitors: 0,
+        bounceRate: 0,
+        avgDuration: 0,
+        liveVisitors: 0
+      };
+    } catch (error) {
+      console.error('Error in /analytics/stats:', error);
+      set.status = 500;
+      return { error: 'Internal server error' };
+    }
+  })
+  
+  .get('/analytics/pages/:websiteId', async ({ params, query, headers, set }) => {
+    try {
+      const authResult = requireAuth(headers.authorization);
+      
+      if (!authResult.success) {
+        set.status = 401;
+        return { error: authResult.error };
+      }
+
+      // Return empty array - no data until tracking is set up
+      return [];
+    } catch (error) {
+      console.error('Error in /analytics/pages:', error);
+      set.status = 500;
+      return { error: 'Internal server error' };
+    }
+  })
+  
+  .get('/analytics/countries/:websiteId', async ({ params, query, headers, set }) => {
+    try {
+      const authResult = requireAuth(headers.authorization);
+      
+      if (!authResult.success) {
+        set.status = 401;
+        return { error: authResult.error };
+      }
+
+      // Return empty array - no data until tracking is set up
+      return [];
+    } catch (error) {
+      console.error('Error in /analytics/countries:', error);
+      set.status = 500;
+      return { error: 'Internal server error' };
+    }
+  })
+  
+  .get('/analytics/referrers/:websiteId', async ({ params, query, headers, set }) => {
+    try {
+      const authResult = requireAuth(headers.authorization);
+      
+      if (!authResult.success) {
+        set.status = 401;
+        return { error: authResult.error };
+      }
+
+      // Return empty array - no data until tracking is set up
+      return [];
+    } catch (error) {
+      console.error('Error in /analytics/referrers:', error);
+      set.status = 500;
+      return { error: 'Internal server error' };
+    }
+  })
+  
+  .delete('/analytics/websites/:websiteId', async ({ params, headers, set }) => {
+    try {
+      const authResult = requireAuth(headers.authorization);
+      
+      if (!authResult.success) {
+        set.status = 401;
+        return { error: authResult.error };
+      }
+
+      // For now, return not implemented
+      // In production, this would delete from database
+      set.status = 501;
+      return {
+        error: 'Website deletion not implemented yet',
+        message: 'This feature requires database setup. Please use the full collector API with database.'
+      };
+    } catch (error) {
+      console.error('Error in DELETE /analytics/websites:', error);
+      set.status = 500;
+      return { error: 'Internal server error' };
+    }
+  })
+  
   // CORS preflight
   .options('*', () => {
     return new Response('', {
       headers: {
         'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type, Authorization',
       },
     });
@@ -170,6 +324,13 @@ console.log(`   POST /auth/verify - Verify JWT token`);
 console.log(`   POST /auth/refresh - Refresh JWT token`);
 console.log(`   GET /protected - Test protected endpoint`);
 console.log(`   GET /health - Health check`);
+console.log(`   GET /analytics/websites - Get websites list`);
+console.log(`   POST /analytics/websites - Add new website`);
+console.log(`   DELETE /analytics/websites/:id - Delete website`);
+console.log(`   GET /analytics/stats/:id - Get website stats`);
+console.log(`   GET /analytics/pages/:id - Get top pages`);
+console.log(`   GET /analytics/countries/:id - Get top countries`);
+console.log(`   GET /analytics/referrers/:id - Get top referrers`);
 
 // Graceful shutdown
 process.on('SIGINT', async () => {
