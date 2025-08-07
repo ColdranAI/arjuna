@@ -7,10 +7,33 @@
     "lint": "turbo run lint",
     "format": "prettier --write .",
     "check-types": "turbo run check-types",
+    
+    "dev:collector": "cd apps/collector && bun run dev",
+    "dev:dashboard": "cd apps/dashboard && bun run dev",
+    "dev:auth": "cd apps/collector && bun src/simple-auth-server.ts",
+    
+    "build:collector": "cd apps/collector && bun run build",
+    "build:dashboard": "cd apps/dashboard && bun run build",
+    "build:production": "pnpm run build:collector && pnpm run build:dashboard",
+    
+    "start:collector": "cd apps/collector && bun run start",
+    "start:dashboard": "cd apps/dashboard && bun run preview",
+    "start:auth": "cd apps/collector && bun dist/simple-auth-server.js",
+    
+    "test:geo": "bun test-geo.js",
+    "test:api": "curl -X GET http://localhost:3001/health",
+    "test:login": "curl -X POST http://localhost:3001/auth/login -H 'Content-Type: application/json' -d '{\"email\":\"meow@nermalcat69.dev\",\"password\":\"meow@nermalcat69.dev\"}'",
+    
     "db:up": "docker-compose up -d postgres redis",
     "db:down": "docker-compose down",
     "db:migrate": "cd packages/db && pnpm drizzle-kit generate:pg && pnpm drizzle-kit migrate",
-    "db:studio": "cd packages/db && pnpm drizzle-kit studio"
+    "db:studio": "cd packages/db && pnpm drizzle-kit studio",
+    
+    "docker:dev": "docker-compose --profile dev up",
+    "docker:prod": "docker-compose up -d",
+    "docker:build": "docker-compose build",
+    "docker:logs": "docker-compose logs -f",
+    "docker:stop": "docker-compose down"
   },
   "devDependencies": {
     "prettier": "^3.6.0",

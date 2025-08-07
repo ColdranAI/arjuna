@@ -1,6 +1,7 @@
 import { Elysia } from 'elysia';
 import { eq, sql, desc, and, gte } from 'drizzle-orm';
 import { pageviews, sessions, websites } from '@arjuna/db';
+import { requireAuth } from '../utils/jwt.js';
 
 const CACHE_KEYS = {
   stats: (websiteId: string, period: string) => `analytics:stats:${websiteId}:${period}`,
@@ -10,7 +11,7 @@ const CACHE_KEYS = {
   liveVisitors: (websiteId: string) => `live:${websiteId}`,
 } as const;
 
-export const analyticsRoutes = new Elysia()
+export const analyticsRoutes = (app: Elysia) => app
   .get('/stats/:websiteId', async ({ params, query, db, redis }) => {
     const { websiteId } = params;
     const period = query.period || '7d';
@@ -266,11 +267,10 @@ export const analyticsRoutes = new Elysia()
 
   .get('/websites', async ({ db, headers, set }) => {
     try {
-      // Simple auth check - in production you'd verify JWT
-      const authorization = headers.authorization;
-      if (!authorization || !authorization.startsWith('Bearer ')) {
+      const authResult = requireAuth(headers.authorization);
+      if (!authResult.success) {
         set.status = 401;
-        return { error: 'Unauthorized' };
+        return { error: authResult.error };
       }
 
       const allWebsites = await db
@@ -287,11 +287,10 @@ export const analyticsRoutes = new Elysia()
 
   .post('/websites', async ({ body, db, headers, set }) => {
     try {
-      // Simple auth check
-      const authorization = headers.authorization;
-      if (!authorization || !authorization.startsWith('Bearer ')) {
+      const authResult = requireAuth(headers.authorization);
+      if (!authResult.success) {
         set.status = 401;
-        return { error: 'Unauthorized' };
+        return { error: authResult.error };
       }
 
       const { domain, name } = body as { domain: string; name: string };

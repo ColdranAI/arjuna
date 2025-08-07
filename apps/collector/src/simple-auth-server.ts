@@ -1,14 +1,28 @@
 import { Elysia } from 'elysia';
+import { cors } from '@elysiajs/cors';
 import bcrypt from 'bcryptjs';
-import { JWTService, requireAuth } from '../utils/jwt.js';
+import { JWTService, requireAuth } from './utils/jwt.js';
 
 interface LoginData {
   email: string;
   password: string;
 }
 
-export const authRoutes = (app: Elysia) => app
-  .post('/login', async ({ body, set }) => {
+const app = new Elysia()
+  .use(cors({
+    origin: true,
+    credentials: true,
+  }))
+  
+  // Health check
+  .get('/health', () => ({ 
+    status: 'ok', 
+    timestamp: new Date().toISOString(),
+    message: 'JWT Auth Server Running'
+  }))
+  
+  // Login endpoint
+  .post('/auth/login', async ({ body, set }) => {
     try {
       const { email, password } = body as LoginData;
       
@@ -43,9 +57,9 @@ export const authRoutes = (app: Elysia) => app
       }
 
       // Generate JWT tokens
-      const payload = {
+      const payload = { 
         email: adminEmail,
-        isAdmin: true
+        isAdmin: true 
       };
       
       const token = JWTService.generateToken(payload);
@@ -68,7 +82,8 @@ export const authRoutes = (app: Elysia) => app
     }
   })
   
-  .post('/verify', async ({ headers, set }) => {
+  // Verify token endpoint
+  .post('/auth/verify', async ({ headers, set }) => {
     const authResult = requireAuth(headers.authorization);
     
     if (!authResult.success) {
@@ -85,7 +100,8 @@ export const authRoutes = (app: Elysia) => app
     };
   })
   
-  .post('/refresh', async ({ body, set }) => {
+  // Refresh token endpoint
+  .post('/auth/refresh', async ({ body, set }) => {
     try {
       const { refreshToken } = body as { refreshToken: string };
       
@@ -115,4 +131,48 @@ export const authRoutes = (app: Elysia) => app
       set.status = 401;
       return { error: 'Invalid refresh token' };
     }
-  });
+  })
+  
+  // Protected test endpoint
+  .get('/protected', async ({ headers, set }) => {
+    const authResult = requireAuth(headers.authorization);
+    
+    if (!authResult.success) {
+      set.status = 401;
+      return { error: authResult.error };
+    }
+
+    return {
+      success: true,
+      message: 'This is a protected endpoint',
+      user: authResult.user,
+      timestamp: new Date().toISOString()
+    };
+  })
+  
+  // CORS preflight
+  .options('*', () => {
+    return new Response('', {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      },
+    });
+  })
+  
+  .listen(process.env.PORT || 3001);
+
+console.log(`🚀 JWT Auth Server running at http://localhost:${app.server?.port}`);
+console.log(`📋 Available endpoints:`);
+console.log(`   POST /auth/login - Login to get JWT token`);
+console.log(`   POST /auth/verify - Verify JWT token`);
+console.log(`   POST /auth/refresh - Refresh JWT token`);
+console.log(`   GET /protected - Test protected endpoint`);
+console.log(`   GET /health - Health check`);
+
+// Graceful shutdown
+process.on('SIGINT', async () => {
+  console.log('Shutting down gracefully...');
+  process.exit(0);
+});
